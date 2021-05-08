@@ -15,11 +15,11 @@ import ktx.ashley.allOf
 import ktx.ashley.get
 
 class ProjectileSystem(
-        val controller: Controller,
-        private val projectileRight: TextureRegion,
-        private val projectileLeft: TextureRegion,
-        private val projectileTwoRight: TextureRegion,
-        private val projectileTwoLeft: TextureRegion,
+    val controller: Controller,
+    private val projectileRight: TextureRegion,
+    private val projectileLeft: TextureRegion,
+    private val projectileTwoRight: TextureRegion,
+    private val projectileTwoLeft: TextureRegion,
 )
     : IteratingSystem(allOf(TransformComponent::class, GraphicComponent::class, ProjectileComponent::class).get()), EntityListener {
 
@@ -46,39 +46,38 @@ class ProjectileSystem(
 
 
 
+        projectile.parentEntity[TransformComponent.mapper]?.let { parentTransform ->
+            transform.pos.set(
+                parentTransform.pos.x + projectile.offset.x,
+                parentTransform.pos.y + projectile.offset.y,
+                transform.pos.z
+            )
+        }
 
-         projectile.parentEntity[TransformComponent.mapper]?.let { parentTransform ->
-             transform.pos.set(
-                     parentTransform.pos.x + projectile.offset.x,
-                     parentTransform.pos.y + projectile.offset.y,
-                     transform.pos.z
-                )
+        projectile.parentEntity[DirectionComponent.mapper]?.let { parentDirection ->
+
+            //  If J is pressed you shoot HEAD type magic
+            if(controller.isAttackOnePressed) {
+                val region = when (parentDirection.currentDirection) {
+                    Direction.LEFT -> projectileLeft
+                    Direction.RIGHT -> projectileRight
+                    else -> projectileRight
+                }
+                if (region == projectileLeft) projectile.velocity = projectile.velocity * -1
+                gfx.setSpriteRegion(region)
             }
 
-            projectile.parentEntity[DirectionComponent.mapper]?.let { parentDirection ->
-
-                //  If J is pressed you shoot HEAD type magic
-                if(Gdx.input.isKeyPressed(Input.Keys.J)) {
-                    val region = when (parentDirection.currentDirection) {
-                        Direction.LEFT -> projectileLeft
-                        Direction.RIGHT -> projectileRight
-                        else -> projectileRight
-                    }
-                    if (region == projectileLeft) projectile.velocity = projectile.velocity * -1
-                    gfx.setSpriteRegion(region)
+            // Otherwise shoot body type magic (MEANING IF K IS PRESSED, SEE RENDERER IN FIRST SCREEN)
+            else {
+                val region = when (parentDirection.currentDirection) {
+                    Direction.LEFT -> projectileTwoLeft
+                    Direction.RIGHT -> projectileTwoRight
+                    else -> projectileTwoRight
                 }
-
-                // Otherwise shoot body type magic (MEANING IF K IS PRESSED, SEE RENDERER IN FIRST SCREEN)
-                else {
-                    val region = when (parentDirection.currentDirection) {
-                        Direction.LEFT -> projectileTwoLeft
-                        Direction.RIGHT -> projectileTwoRight
-                        else -> projectileTwoRight
-                    }
-                    if (region == projectileTwoLeft) projectile.velocity = projectile.velocity * -1
-                    gfx.setSpriteRegion(region)
-                }
+                if (region == projectileTwoLeft) projectile.velocity = projectile.velocity * -1
+                gfx.setSpriteRegion(region)
             }
+        }
     }
 
     override fun entityRemoved(entity: Entity) = Unit
@@ -92,7 +91,6 @@ class ProjectileSystem(
         require(transform!=null) {"No transform component "}
         val projectile = entity[ProjectileComponent.mapper]
         require(projectile!=null) {"No transform component "}
-
 
 
         if(projectile.lastPos == transform.pos){

@@ -44,12 +44,6 @@ class InputSystem(private val myViewport: Viewport, val controller: Controller) 
         }
          */
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.E)){
-            val player = entity[PlayerComponent.mapper]
-            require(player!=null) {"No player component "}
-            player.gameinit.setScreen<SecondScreen>()
-        }
-
         if(Gdx.input.isKeyPressed(Input.Keys.W) || controller.isUpPressed){
             dir.walkDirection = Direction.UP
         }

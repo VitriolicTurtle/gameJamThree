@@ -117,8 +117,8 @@ class Controller {
             }
         })
         val atkOne = Image(Texture(Gdx.files.internal("graphics/atkOne.png")))
-        leftImg.setSize(50f, 50f)
-        leftImg.addListener(object : InputListener() {
+        atkOne.setSize(50f, 50f)
+        atkOne.addListener(object : InputListener() {
             override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
                 isAttackOnePressed = true
                 LOG.debug{ "AAAA" }
@@ -130,8 +130,8 @@ class Controller {
             }
         })
         val atkTwo = Image(Texture(Gdx.files.internal("graphics/atkTwo.png")))
-        leftImg.setSize(50f, 50f)
-        leftImg.addListener(object : InputListener() {
+        atkTwo.setSize(50f, 50f)
+        atkTwo.addListener(object : InputListener() {
             override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
                 isAttackTwoPressed = true
                 LOG.debug{ "BBBB" }

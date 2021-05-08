@@ -28,7 +28,6 @@ const val unitScale = 1/16f
 class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
     val gameViewport = FitViewport(16f, 9f)
     val batch: Batch by lazy { SpriteBatch() }
-    val batch2: Batch by lazy { SpriteBatch() }
     val controller: Controller by lazy {Controller(batch as SpriteBatch)}
 
     //      Get bodyparts
@@ -114,15 +113,15 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
             playerHeadTextureLeft
         ))
         addSystem(ProjectileSystem(
-                controller,
-                bulletOneTextureRight,
-                bulletOneTextureLeft,
-                bulletTwoTextureRight,
-                bulletTwoTextureLeft
+            controller,
+            bulletOneTextureRight,
+            bulletOneTextureLeft,
+            bulletTwoTextureRight,
+            bulletTwoTextureLeft
 
         ))
-        addSystem(RenderSystem(batch, batch2, gameViewport))
-        }
+        addSystem(RenderSystem(batch, gameViewport))
+    }
     }
 
 
@@ -135,18 +134,16 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
     }
 
 
-
+    /*
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         controller.resize(width, height)
     }
+     */
 
     override fun render() {
         super.render()
         controller.draw()
-
-
-
     }
 
 

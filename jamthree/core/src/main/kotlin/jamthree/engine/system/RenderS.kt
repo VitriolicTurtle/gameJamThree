@@ -19,8 +19,7 @@ private val LOG = logger<RenderSystem>()
 
 
 class RenderSystem(
-        private val batch: Batch,
-        private val batch2: Batch,
+    private val batch: Batch,
     private val myViewport: Viewport
 ) : SortedIteratingSystem(
     allOf(TransformComponent::class, GraphicComponent::class).get(), compareBy{ entity -> entity[TransformComponent.mapper]}){
@@ -30,9 +29,7 @@ class RenderSystem(
         myViewport.apply()
         batch.use(myViewport.camera.combined){
             super.update(deltaTime)
-
         }
-
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
@@ -40,16 +37,6 @@ class RenderSystem(
         require(transform!=null){"Must have transform component"}
         val graphic = entity[GraphicComponent.mapper]
         require(graphic!=null){"Must have transform component"}
-
-
-        val player = entity[PlayerComponent.mapper]
-        if (player != null) {
-            entity[TransformComponent.mapper]?.let { trans ->
-                myViewport.camera.position.x = trans.pos.x
-                myViewport.camera.position.y = trans.pos.y
-
-            }
-        }
 
 
         graphic.sprite.run{
