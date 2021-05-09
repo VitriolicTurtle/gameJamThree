@@ -68,6 +68,7 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
     var secondCounter = 0f
     var castTimer = 0f
+    var doOnce = true
     override fun render(delta: Float){
         engine.update(delta)
         secondCounter+=delta
@@ -76,25 +77,30 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
         if(castTimer > 0.1f) {
             // Pressing "J" = Using magic = Wild Magic bar goes up with an inconsistant amount. (current value * random multiplier)
-            if (controller.isAttackOnePressed || controller.isAttackTwoPressed) {
-                val projectile = game.engine.entity {
-                    with<TransformComponent>()
-                    with<GraphicComponent>()
-                    with<ProjectileComponent> {
-                        parentEntity = playerBody
-                        offset.set(1 * unitScale, 0f)
-                    }
-                }
 
-                val random = 0.0f + Math.random() * (0.8f - 0.0f)
-                if (wildMagicLevel <= 0.0f) wildMagicLevel += 0.0015f
-                else wildMagicLevel += wildMagicLevel * random.toFloat()
-                LOG.debug { wildMagicLevel.toString() }
-                batch.begin()
-                //  Wild magic bar updated every time magic is used
-                batch.draw(magic, 0f, 0f, Gdx.graphics.width * wildMagicLevel, 0.2f)
-                batch.end()
-            }
+                if (controller.isAttackOnePressed || controller.isAttackTwoPressed) {
+                    while(doOnce) {
+
+                        val projectile = game.engine.entity {
+                        with<TransformComponent>()
+                        with<GraphicComponent>()
+                        with<ProjectileComponent> {
+                            parentEntity = playerBody
+                            offset.set(1 * unitScale, 0f)
+                        }
+                    }
+
+                    val random = 0.0f + Math.random() * (0.8f - 0.0f)
+                    if (wildMagicLevel <= 0.0f) wildMagicLevel += 0.0015f
+                    else wildMagicLevel += wildMagicLevel * random.toFloat()
+                    LOG.debug { wildMagicLevel.toString() }
+                    batch.begin()
+                    //  Wild magic bar updated every time magic is used
+                    batch.draw(magic, 0f, 0f, Gdx.graphics.width * wildMagicLevel, 0.2f)
+                    batch.end()
+                    doOnce = false
+                }
+            }else { doOnce = true }
             castTimer = 0f
         }
 
