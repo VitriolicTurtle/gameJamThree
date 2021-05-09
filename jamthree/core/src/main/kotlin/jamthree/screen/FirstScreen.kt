@@ -31,9 +31,11 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
     private val enemyOne = Texture(Gdx.files.internal("graphics/Enemy01.png"))
     private val floorOne = Texture(Gdx.files.internal("graphics/floor01.png"))
     private val spawnOne = Texture(Gdx.files.internal("graphics/Spawn01.png"))
+    private val bombOne = Texture(Gdx.files.internal("graphics/Bomb01.png"))
     private val wallOne = Texture(Gdx.files.internal("graphics/wall01.png"))
     var wildMagicLevel = 0.0f
-    private var teacherPosArray = Array<Vector3>()
+    private var enemyPosArray = Array<Vector3>()
+    private var activatablePosArray = Array<Vector3>()
 
 
 
@@ -81,6 +83,8 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
         //  Handle spawnning of enemies
         spawnEnemies(delta)
 
+        //  Handle spawning activatables
+        spawnActivatables(delta)
 
 
         // Handles shooting
@@ -116,7 +120,7 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
                         batch.begin()
                          //  Wild magic bar updated every time magic is used
-                         batch.draw(magic, magicBarPosition.x, magicBarPosition.y, pComponent.mana, 0.2f)
+                        batch.draw(magic, magicBarPosition.x, magicBarPosition.y, pComponent.mana, 0.2f)
                         batch.end()
                          doOnce = false
                   }
@@ -179,8 +183,12 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                                 if(char == '0'){setRegion(floorOne)}
                                 if(char == '1'){setRegion(wallOne)}
                                 if(char == '2'){
-                                    teacherPosArray.add(Vector3(column.toFloat(), row.toFloat(), 0f))
+                                    enemyPosArray.add(Vector3(column.toFloat(), row.toFloat(), 0f))
                                     setRegion(spawnOne)
+                                }
+                                if(char == '3'){
+                                    activatablePosArray.add(Vector3(column.toFloat(), row.toFloat(), 0f))
+                                    setRegion(floorOne)
                                 }
                                 setSize(texture.width * unitScale, texture.height * unitScale)
                                 setOriginCenter()
@@ -211,7 +219,7 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
         if(spawnTimer > 1f) {
             val testEnemy = game.engine.entity{
-                with<TransformComponent>{ pos.set(teacherPosArray[posIndex]) }
+                with<TransformComponent>{ pos.set(enemyPosArray[posIndex]) }
                 with<EnemyMovementComponent>()
                 with<GraphicComponent>{
                     sprite.run {
@@ -227,8 +235,33 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
             }
             spawnTimer = 0f
             posIndex+=1
-            if(posIndex>=teacherPosArray.size)  posIndex = 0
+            if(posIndex>=enemyPosArray.size)  posIndex = 0
         }
 
+    }
+
+    var activatableSpawnTime = 0f
+    fun spawnActivatables(delta: Float){
+        activatableSpawnTime+=delta
+        val random = 0 + Math.random() * (activatablePosArray.size - 0)
+
+        if(activatableSpawnTime > 0.1f) {
+            val testActivatable = game.engine.entity{
+                with<TransformComponent>{ pos.set(activatablePosArray[random.toInt()]) }
+                with<GraphicComponent>{
+                    sprite.run {
+                        setRegion(bombOne)
+                        setSize(texture.width * unitScale, texture.height * unitScale)
+                        setOriginCenter()
+                    }
+                }
+                with<CollisionComponent>{
+                    isWall = false
+                    isEnemy = false
+                    isBomb = true
+                }
+            }
+            activatableSpawnTime = 0f
+        }
     }
 }

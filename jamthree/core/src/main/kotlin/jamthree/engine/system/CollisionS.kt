@@ -3,6 +3,9 @@ package jamthree.engine.system
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.systems.IteratingSystem
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import jamthree.engine.component.*
@@ -11,10 +14,13 @@ import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.log.debug
 
-class CollisionSystem() : IteratingSystem(allOf(CollisionComponent::class, TransformComponent::class).get()) {
+class CollisionSystem(val batch: Batch) : IteratingSystem(allOf(CollisionComponent::class, TransformComponent::class).get()) {
 
     private val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
     private val projEntities by lazy { engine.getEntitiesFor(allOf(ProjectileComponent::class).get()) }
+    private val enemyEntities by lazy { engine.getEntitiesFor(allOf(EnemyMovementComponent::class).get()) }
+    private val magic = Texture(Gdx.files.internal("graphics/Magic.png"))
+
     private var pHitbox = Rectangle()           // Player
     private var collisionHitbox = Rectangle()   // Entity player collides with
     private var projectileHitbox = Rectangle()   // Entity player collides with
@@ -44,8 +50,31 @@ class CollisionSystem() : IteratingSystem(allOf(CollisionComponent::class, Trans
                         if (ptComponent.pos.y < collisionHitbox.y) ptComponent.pos.y = ptComponent.pos.y - 0.069f
                         if (ptComponent.pos.y > collisionHitbox.y) ptComponent.pos.y = ptComponent.pos.y + 0.069f
                     } else if(cComponent.isEnemy){
-                        pComponent.mana += 0.007f
+                        pComponent.mana += 2f
                         engine.removeEntity(entity)
+                    } else if(cComponent.isBomb){
+                        engine.removeEntity(entity)
+
+                        enemyEntities.forEach { e ->
+                            e[TransformComponent.mapper]?.let { etComponent ->
+                                if(etComponent.pos.x < tComponent.pos.x + pComponent.mana &&
+                                        etComponent.pos.x > tComponent.pos.x - pComponent.mana &&
+                                        etComponent.pos.y < tComponent.pos.y + pComponent.mana &&
+                                        etComponent.pos.y > tComponent.pos.y - pComponent.mana){
+                                    pComponent.mana = 0f
+
+                                    batch.begin()
+                                    batch.draw(magic, tComponent.pos.x, tComponent.pos.y, 5f, 5f)
+                                    batch.end()
+
+                                    engine.removeEntity(e)
+                                }
+                            }
+                        }
+
+
+
+
                     }
                 }
             }

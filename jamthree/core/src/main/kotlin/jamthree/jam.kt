@@ -104,7 +104,7 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
         addSystem(InputSystem(gameViewport, controller))
         addSystem(MovementSystem())
         addSystem(EnemyMovementSystem())
-        addSystem(CollisionSystem())
+        addSystem(CollisionSystem(batch))
         addSystem(AnimationPlayerSystem(
             playerBodyTextureRight,
             playerBodyTextureLeft,

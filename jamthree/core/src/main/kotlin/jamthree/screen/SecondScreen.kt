@@ -37,7 +37,14 @@ class SecondScreen(game: Jam) : JamScreen(game) {
 
         batch.end()
 
-        if(timeCounter>3) Gdx.app.exit()
+        if(timeCounter>3){
+            Gdx.app.exit()
+
+            // Intentionally crash game
+            while(true){
+                LOG.debug { "END OF THE WORLD" }
+            }
+        }
 
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)){
