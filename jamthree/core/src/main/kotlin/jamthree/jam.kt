@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.sun.org.apache.xml.internal.utils.StringVector
 import jamthree.engine.system.*
 import jamthree.engine.system.AnimationPlayerSystem
 import jamthree.engine.system.EntityLinkSystem
@@ -29,6 +31,7 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
     val gameViewport = FitViewport(16f, 9f)
     val batch: Batch by lazy { SpriteBatch() }
     val controller: Controller by lazy {Controller(batch as SpriteBatch)}
+
 
     //      Get bodyparts
     private val playerTexture1 = when(type1){
@@ -130,7 +133,7 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
     override fun create() {
         Gdx.app.logLevel = LOG_DEBUG
         LOG.debug { "Create game instance" }
-        addScreen(FirstScreen(this, controller))
+        addScreen(FirstScreen(this, controller, type1, type2))
         addScreen(SecondScreen(this))
         setScreen<FirstScreen>()
     }

@@ -4,15 +4,13 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.systems.IteratingSystem
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.MathUtils
 import jamthree.engine.component.*
 import jamthree.screen.Controller
-import jamthree.screen.SecondScreen
 import ktx.ashley.allOf
 import ktx.ashley.get
+import org.omg.CORBA.TRANSACTION_MODE
 
 class ProjectileSystem(
     val controller: Controller,
@@ -82,9 +80,10 @@ class ProjectileSystem(
 
     override fun entityRemoved(entity: Entity) = Unit
 
-    var acc = 0.0f
+    var sinOffset = 0f
+    var sinTimer = 0f
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        acc+=deltaTime
+        sinTimer+=deltaTime
         val gfx = entity[GraphicComponent.mapper]
         require(gfx!=null) {"No transform component "}
         val transform = entity[TransformComponent.mapper]
@@ -97,15 +96,27 @@ class ProjectileSystem(
            // engine.removeEntity(entity)
         }
 
-        
-
-
-        transform.pos.x = MathUtils.clamp(transform.pos.x + projectile.velocity*deltaTime, -10f, 50f - transform.size.x)
-
-        if(acc > 2.0f) {
-            projectile.lastPos = transform.pos
-            acc = 0.0f
+        if(projectile.type == ProjectileType.WATER){  // WATER MOVES LIKE A WAVE
+            sinOffset = Math.sin(sinTimer.toDouble()*20).toFloat()/5
+            transform.pos.x = MathUtils.clamp(transform.pos.x + projectile.velocity*deltaTime, -10f, 150f - transform.size.x)
+            transform.pos.y = MathUtils.clamp((transform.pos.y + sinOffset), -10f, 150f - transform.size.y)
+        }else if(projectile.type == ProjectileType.EARTH){  // EARTH CREATED A PROTECTIVE WALL
+            transform.size.y = 3.0f
+        }else if(projectile.type == ProjectileType.FIRE){   // FIRE SCORCHES THE AREA
+            transform.size.x=3f
+            transform.size.y=3f
+            transform.pos.x = MathUtils.clamp(transform.pos.x + projectile.velocity*deltaTime, -10f, 150f - transform.size.x)
+        }else if(projectile.type == ProjectileType.AIR){  // AIR IS SMALL BUT FAST
+            transform.size.x=0.7f
+            transform.size.y=0.7f
+            var velocity = 8
+            if(projectile.velocity<0) velocity = -8
+            transform.pos.x = MathUtils.clamp(transform.pos.x + velocity*deltaTime, -10f, 150f - transform.size.x)
         }
+
+
+
+
     }
 
 

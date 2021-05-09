@@ -23,7 +23,7 @@ import java.io.File
 private val LOG = logger<FirstScreen>()
 
 /** First screen of the application. Displayed after the application is created.  */
-class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
+class FirstScreen(game: Jam, val controller: Controller, var type1: String, var type2: String) : JamScreen(game) {
     private val viewport = FitViewport(16f, 9f)
 
 
@@ -87,6 +87,8 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
         spawnActivatables(delta)
 
 
+
+
         // Handles shooting
         val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
         pEntities.forEach { p ->
@@ -102,11 +104,25 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
                 if (controller.isAttackOnePressed || controller.isAttackTwoPressed) {
                     while(doOnce) {
-
                         val projectile = game.engine.entity {
                         with<TransformComponent>()
                         with<GraphicComponent>()
                         with<ProjectileComponent> {
+                            if(controller.isAttackOnePressed) {
+                                when (type1) {
+                                    "Earth" -> type = ProjectileType.EARTH
+                                    "Wind" -> type = ProjectileType.AIR
+                                    "Fire" -> type = ProjectileType.FIRE
+                                    "Water" -> type = ProjectileType.WATER
+                                }
+                            }else {
+                                when (type2) {
+                                    "Earth" -> type = ProjectileType.EARTH
+                                    "Wind" -> type = ProjectileType.AIR
+                                    "Fire" -> type = ProjectileType.FIRE
+                                    "Water" -> type = ProjectileType.WATER
+                                }
+                            }
                             parentEntity = playerBody
                             offset.set(1 * unitScale, 0f)
                         }
