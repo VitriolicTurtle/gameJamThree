@@ -22,20 +22,22 @@ private val LOG = logger<SecondScreen>()
 class SecondScreen(game: Jam) : JamScreen(game) {
     private val gameOver = Texture(Gdx.files.internal("graphics/gameOver.png"))
 
-    val xxxx = FitViewport(1110f, 1110f)
-    val font = BitmapFont()
-    val test: CharSequence = "Ebin :DDDD"
+    var timeCounter = 0f
 
     override fun show(){
         LOG.debug{ "Second screen "}
     }
 
     override fun render(delta: Float){
+        timeCounter+=delta
+
         batch.begin()
         //  Wild magic bar updated every time magic is used
-        batch.draw(gameOver, 0f, 0f, 16f*54, 9f*54)
+        batch.draw(gameOver, 0f, 0f, 16f*48, 9f*48)
 
         batch.end()
+
+        if(timeCounter>3) Gdx.app.exit()
 
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)){

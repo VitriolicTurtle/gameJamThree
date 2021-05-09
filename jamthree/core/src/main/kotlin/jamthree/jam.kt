@@ -145,7 +145,7 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
 
     override fun render() {
         super.render()
-        controller.draw()
+
     }
 
 

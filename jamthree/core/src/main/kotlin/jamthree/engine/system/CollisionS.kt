@@ -14,8 +14,10 @@ import ktx.log.debug
 class CollisionSystem() : IteratingSystem(allOf(CollisionComponent::class, TransformComponent::class).get()) {
 
     private val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
+    private val projEntities by lazy { engine.getEntitiesFor(allOf(ProjectileComponent::class).get()) }
     private var pHitbox = Rectangle()           // Player
     private var collisionHitbox = Rectangle()   // Entity player collides with
+    private var projectileHitbox = Rectangle()   // Entity player collides with
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val tComponent = entity[TransformComponent.mapper]
@@ -24,18 +26,18 @@ class CollisionSystem() : IteratingSystem(allOf(CollisionComponent::class, Trans
         require(cComponent != null) {}
         collisionHitbox.set(tComponent.pos.x, tComponent.pos.y, tComponent.size.x, tComponent.size.y)
 
+        // FOR EACH PLAYER
         pEntities.forEach { p ->
             val pComponent = p[PlayerComponent.mapper]
-            require(pComponent != null)
+            require(pComponent != null) {}
             p[TransformComponent.mapper]?.let { ptComponent ->
                 pHitbox.set(
-                    ptComponent.pos.x,
-                    ptComponent.pos.y,
-                    ptComponent.size.x * 1.0f,
-                    ptComponent.size.y * 1.2f
+                        ptComponent.pos.x,
+                        ptComponent.pos.y,
+                        ptComponent.size.x * 1.2f,
+                        ptComponent.size.y * 1.2f
                 )
-                val dComponent = p[DirectionComponent.mapper]
-                 if (pHitbox.overlaps(collisionHitbox)) {
+                if (pHitbox.overlaps(collisionHitbox)) {
                     if(cComponent.isWall){
                         if (ptComponent.pos.x < collisionHitbox.x) ptComponent.pos.x = ptComponent.pos.x - 0.069f
                         if (ptComponent.pos.x > collisionHitbox.x) ptComponent.pos.x = ptComponent.pos.x + 0.069f
@@ -45,6 +47,24 @@ class CollisionSystem() : IteratingSystem(allOf(CollisionComponent::class, Trans
                         pComponent.mana += 0.007f
                         engine.removeEntity(entity)
                     }
+                }
+            }
+        }
+
+        //  FOR EACH PROJECTILE
+        projEntities.forEach { proj ->
+            val projComponent = proj[ProjectileComponent.mapper]
+            require(projComponent != null) {}
+            proj[TransformComponent.mapper]?.let { ptComponent ->
+                projectileHitbox.set(
+                        ptComponent.pos.x,
+                        ptComponent.pos.y,
+                        ptComponent.size.x * 0.4f,
+                        ptComponent.size.y * 0.4f
+                )
+                if (projectileHitbox.overlaps(collisionHitbox)) {
+                    engine.removeEntity(proj)
+                    if(cComponent.isEnemy) engine.removeEntity(entity)
                 }
             }
         }

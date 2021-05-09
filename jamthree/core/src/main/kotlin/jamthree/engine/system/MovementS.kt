@@ -38,10 +38,10 @@ class MovementSystem() : IteratingSystem(allOf(TransformComponent::class, Moveme
             entity[DirectionComponent.mapper]?.let { direction ->
                 if (direction.walkDirection != Direction.DEFAULT) {
                     when (direction.walkDirection) {
-                        Direction.LEFT -> {transform.pos.x = MathUtils.clamp(transform.pos.x + movement.velocity.x* -deltaTime, 0f, 16f - transform.size.x); }
-                        Direction.RIGHT -> {transform.pos.x = MathUtils.clamp(transform.pos.x + movement.velocity.x* deltaTime, 0f, 16f - transform.size.x); }
-                        Direction.UP -> {transform.pos.y = MathUtils.clamp(transform.pos.y +movement.velocity.y* deltaTime, 0f, 9f - transform.size.y); }
-                        Direction.DOWN -> {transform.pos.y = MathUtils.clamp(transform.pos.y + movement.velocity.y* -deltaTime, 0f, 9f - transform.size.y); }
+                        Direction.LEFT -> {transform.pos.x = MathUtils.clamp(transform.pos.x + movement.velocity.x* -deltaTime, -10f, 100f - transform.size.x); }
+                        Direction.RIGHT -> {transform.pos.x = MathUtils.clamp(transform.pos.x + movement.velocity.x* deltaTime, -10f, 100f - transform.size.x); }
+                        Direction.UP -> {transform.pos.y = MathUtils.clamp(transform.pos.y +movement.velocity.y* deltaTime, -10f, 100f - transform.size.y); }
+                        Direction.DOWN -> {transform.pos.y = MathUtils.clamp(transform.pos.y + movement.velocity.y* -deltaTime, -10f, 100f - transform.size.y); }
                     }
 
                 }

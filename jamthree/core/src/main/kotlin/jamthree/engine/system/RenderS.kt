@@ -3,6 +3,8 @@ package jamthree.engine.system
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.Viewport
 import jamthree.Jam
 import jamthree.engine.component.DirectionComponent
@@ -24,6 +26,8 @@ class RenderSystem(
 ) : SortedIteratingSystem(
     allOf(TransformComponent::class, GraphicComponent::class).get(), compareBy{ entity -> entity[TransformComponent.mapper]}){
 
+    private val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
+
     override fun update(deltaTime: Float) {
         forceSort()
         myViewport.apply()
@@ -38,6 +42,11 @@ class RenderSystem(
         val graphic = entity[GraphicComponent.mapper]
         require(graphic!=null){"Must have transform component"}
 
+        pEntities.forEach { p ->
+            p[TransformComponent.mapper]?.let { ptComponent ->
+                myViewport.camera.position.set(Vector3(ptComponent.pos.x, ptComponent.pos.y, 2f))
+            }
+        }
 
         graphic.sprite.run{
             rotation = transform.rot

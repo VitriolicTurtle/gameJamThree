@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.viewport.FitViewport
 import jamthree.Jam
 import jamthree.engine.component.*
@@ -26,9 +29,12 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
     private val magic = Texture(Gdx.files.internal("graphics/Magic.png"))
     private val enemyOne = Texture(Gdx.files.internal("graphics/Enemy01.png"))
-    private val floorOne = Texture(Gdx.files.internal("graphics/Floor01.png"))
-    private val wallOne = Texture(Gdx.files.internal("graphics/Wall01.png"))
+    private val floorOne = Texture(Gdx.files.internal("graphics/floor01.png"))
+    private val spawnOne = Texture(Gdx.files.internal("graphics/Spawn01.png"))
+    private val wallOne = Texture(Gdx.files.internal("graphics/wall01.png"))
     var wildMagicLevel = 0.0f
+    private var teacherPosArray = Array<Vector3>()
+
 
 
     private val playerBody = game.engine.entity{
@@ -55,37 +61,39 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
         renderMap()
 
-        val testEnemy = game.engine.entity{
-            with<TransformComponent>{ pos.set(1f, 1f, 0f) }
-            with<EnemyMovementComponent>()
-            with<GraphicComponent>{
-                sprite.run {
-                    setRegion(enemyOne)
-                    setSize(texture.width * unitScale, texture.height * unitScale)
-                    setOriginCenter()
-                }
-            }
-            with<CollisionComponent>{
-                isWall = false
-                isEnemy = true
-            }
-        }
+
     }
 
     var secondCounter = 0f
     var castTimer = 0f
     var doOnce = true
     override fun render(delta: Float){
+
         engine.update(delta)
         secondCounter+=delta
         castTimer+=delta
 
+
+
+
+
+
+        //  Handle spawnning of enemies
+        spawnEnemies(delta)
+
+
+
+        // Handles shooting
         val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
         pEntities.forEach { p ->
             val pComponent = p[PlayerComponent.mapper]
             require(pComponent != null)
+            val tComponent = p[TransformComponent.mapper]
+            require(tComponent != null)
 
-        if(castTimer > 0.1f) {
+            val magicBarPosition = Vector2(tComponent.pos.x-7, tComponent.pos.y+4)
+
+        if(castTimer > 0.01f) {
             // Pressing "J" = Using magic = Wild Magic bar goes up with an inconsistant amount. (current value * random multiplier)
 
                 if (controller.isAttackOnePressed || controller.isAttackTwoPressed) {
@@ -100,16 +108,18 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                         }
                     }
 
-                    val random = 0.0f + Math.random() * (0.8f - 0.0f)
-                    if (pComponent.mana <= 0.0f) pComponent.mana += 0.0015f
-                    else pComponent.mana += pComponent.mana * random.toFloat()
-                    LOG.debug { pComponent.mana.toString() }
-                    batch.begin()
-                    //  Wild magic bar updated every time magic is used
-                    batch.draw(magic, 0f, 0f, Gdx.graphics.width * pComponent.mana, 0.2f)
-                    batch.end()
-                    doOnce = false
-                }
+                        val random = 0.0f + Math.random() * (0.8f - 0.0f)
+                        if (pComponent.mana <= 0.0f) pComponent.mana += 0.0015f
+                        else pComponent.mana += pComponent.mana * random.toFloat()
+
+                        if(pComponent.mana > 0.018) pComponent.mana = 0.018f
+
+                        batch.begin()
+                         //  Wild magic bar updated every time magic is used
+                         batch.draw(magic, magicBarPosition.x, magicBarPosition.y, Gdx.graphics.width * pComponent.mana, 0.2f)
+                        batch.end()
+                         doOnce = false
+                  }
             }else { doOnce = true }
             castTimer = 0f
         }
@@ -123,26 +133,31 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                 secondCounter = 0.0f
                 pComponent.mana -= 0.001f * random.toFloat()
 
+                if(pComponent.mana < 0) pComponent.mana = 0f
+                if(pComponent.mana > 0.018) pComponent.mana = 0.018f
+
                 //  Wild magic bar update every second when bar is reduced
                 batch.begin()
-                batch.draw(magic, 0f, 0f, Gdx.graphics.width * pComponent.mana, 0.2f)
+                batch.draw(magic, magicBarPosition.x, magicBarPosition.y, Gdx.graphics.width * pComponent.mana, 0.2f)
                 batch.end()
             }
 
         batch.begin()
         //  Wild magic bar
-        batch.draw(magic, 0f, 0f,  Gdx.graphics.width * pComponent.mana, 0.2f)
+        batch.draw(magic, magicBarPosition.x, magicBarPosition.y,  Gdx.graphics.width * pComponent.mana, 0.2f)
         batch.end()
-        }
 
 
-        if(wildMagicLevel>0.02){
+        if(pComponent.mana>=0.0179){
             game.setScreen<SecondScreen>()
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)){
             game.setScreen<SecondScreen>()
         }
+        }
+
+        controller.draw()
     }
 
     fun renderMap(){
@@ -163,6 +178,10 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                             sprite.run {
                                 if(char == '0'){setRegion(floorOne)}
                                 if(char == '1'){setRegion(wallOne)}
+                                if(char == '2'){
+                                    teacherPosArray.add(Vector3(column.toFloat(), row.toFloat(), 0f))
+                                    setRegion(spawnOne)
+                                }
                                 setSize(texture.width * unitScale, texture.height * unitScale)
                                 setOriginCenter()
                             }
@@ -184,4 +203,32 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
         }
     }
 
+    var spawnTimer = 0f
+    var posIndex = 0
+
+    fun spawnEnemies(delta: Float){
+        spawnTimer+=delta
+
+        if(spawnTimer > 1f) {
+            val testEnemy = game.engine.entity{
+                with<TransformComponent>{ pos.set(teacherPosArray[posIndex]) }
+                with<EnemyMovementComponent>()
+                with<GraphicComponent>{
+                    sprite.run {
+                        setRegion(enemyOne)
+                        setSize(texture.width * unitScale, texture.height * unitScale)
+                        setOriginCenter()
+                    }
+                }
+                with<CollisionComponent>{
+                    isWall = false
+                    isEnemy = true
+                }
+            }
+            spawnTimer = 0f
+            posIndex+=1
+            if(posIndex>=teacherPosArray.size)  posIndex = 0
+        }
+
+    }
 }
