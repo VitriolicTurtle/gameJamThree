@@ -109,14 +109,14 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                     }
 
                         val random = 0.0f + Math.random() * (0.8f - 0.0f)
-                        if (pComponent.mana <= 0.0f) pComponent.mana += 0.0015f
+                        if (pComponent.mana <= 0.0f) pComponent.mana += 1f
                         else pComponent.mana += pComponent.mana * random.toFloat()
-
-                        if(pComponent.mana > 0.018) pComponent.mana = 0.018f
+                        if(pComponent.mana > 14) pComponent.mana = 14f
+                        //if(pComponent.mana > 0.018) pComponent.mana = 0.018f
 
                         batch.begin()
                          //  Wild magic bar updated every time magic is used
-                         batch.draw(magic, magicBarPosition.x, magicBarPosition.y, Gdx.graphics.width * pComponent.mana, 0.2f)
+                         batch.draw(magic, magicBarPosition.x, magicBarPosition.y, pComponent.mana, 0.2f)
                         batch.end()
                          doOnce = false
                   }
@@ -131,24 +131,24 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
             if (secondCounter >= 1.0f && pComponent.mana > 0.0f) {
                 val random = 0.0f + Math.random() * (4f - 0.0f)
                 secondCounter = 0.0f
-                pComponent.mana -= 0.001f * random.toFloat()
+                pComponent.mana -= 1f * random.toFloat()
 
                 if(pComponent.mana < 0) pComponent.mana = 0f
-                if(pComponent.mana > 0.018) pComponent.mana = 0.018f
+                if(pComponent.mana > 14) pComponent.mana = 14f
 
                 //  Wild magic bar update every second when bar is reduced
                 batch.begin()
-                batch.draw(magic, magicBarPosition.x, magicBarPosition.y, Gdx.graphics.width * pComponent.mana, 0.2f)
+                batch.draw(magic, magicBarPosition.x, magicBarPosition.y, pComponent.mana, 0.2f)
                 batch.end()
             }
 
         batch.begin()
         //  Wild magic bar
-        batch.draw(magic, magicBarPosition.x, magicBarPosition.y,  Gdx.graphics.width * pComponent.mana, 0.2f)
+        batch.draw(magic, magicBarPosition.x, magicBarPosition.y,  pComponent.mana, 0.2f)
         batch.end()
 
 
-        if(pComponent.mana>=0.0179){
+        if(pComponent.mana == 14f){
             game.setScreen<SecondScreen>()
         }
 
@@ -165,8 +165,8 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
             var tileArray = arrayOf<CharArray>()
             var column = 0
             var row = 0
-            val fileName = "assets/magicMap.txt"
-            val lines:List<String> = File(fileName).readLines().asReversed()
+            val quizMap = Gdx.files.internal("magicMap.txt")
+            val lines:List<String> = (quizMap.readString()).lines().asReversed()
             lines.forEach { line ->
                 column = 0
                 line.forEach { char ->

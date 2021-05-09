@@ -10,8 +10,8 @@ class GameActivity : AndroidApplication() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val type1 = intent?.getStringExtra("Type1").toString()
-        val type2 = intent?.getStringExtra("Type2").toString()
+        val type1 = intent.getStringExtra("Type1").toString()
+        val type2 = intent.getStringExtra("Type2").toString()
 
 
         initialize(Jam(type1, type2), AndroidApplicationConfiguration())
