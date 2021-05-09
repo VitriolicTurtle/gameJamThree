@@ -96,6 +96,10 @@ class ProjectileSystem(
         if(projectile.lastPos == transform.pos){
            // engine.removeEntity(entity)
         }
+
+        
+
+
         transform.pos.x = MathUtils.clamp(transform.pos.x + projectile.velocity*deltaTime, -10f, 50f - transform.size.x)
 
         if(acc > 2.0f) {

@@ -7,29 +7,41 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import jamthree.engine.component.*
 import jamthree.engine.component.CollisionComponent.Companion.mapper
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.log.debug
+import ktx.log.logger
+
+
+private val LOG = logger<CollisionSystem>()
 
 class CollisionSystem(val batch: Batch) : IteratingSystem(allOf(CollisionComponent::class, TransformComponent::class).get()) {
 
     private val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
     private val projEntities by lazy { engine.getEntitiesFor(allOf(ProjectileComponent::class).get()) }
     private val enemyEntities by lazy { engine.getEntitiesFor(allOf(EnemyMovementComponent::class).get()) }
-    private val magic = Texture(Gdx.files.internal("graphics/Magic.png"))
+    private val magic = Texture(Gdx.files.internal("graphics/Blast.png"))
 
     private var pHitbox = Rectangle()           // Player
     private var collisionHitbox = Rectangle()   // Entity player collides with
     private var projectileHitbox = Rectangle()   // Entity player collides with
+    private var bombHitbox = Rectangle()   // Entity player collides with
+
+
+
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val tComponent = entity[TransformComponent.mapper]
         require(tComponent != null) {}
         val cComponent = entity[CollisionComponent.mapper]
         require(cComponent != null) {}
+        val gComponent = entity[GraphicComponent.mapper]
+        require(gComponent != null) {}
+
         collisionHitbox.set(tComponent.pos.x, tComponent.pos.y, tComponent.size.x, tComponent.size.y)
 
         // FOR EACH PLAYER
@@ -52,29 +64,30 @@ class CollisionSystem(val batch: Batch) : IteratingSystem(allOf(CollisionCompone
                     } else if(cComponent.isEnemy){
                         pComponent.mana += 2f
                         engine.removeEntity(entity)
-                    } else if(cComponent.isBomb){
-                        engine.removeEntity(entity)
+                    } else if(cComponent.isBomb) {
 
+                        gComponent.sprite.run {
+                            setRegion(magic)
+                        }
+                        //var tempPos = tComponent
+                        tComponent.pos = Vector3(tComponent.pos.x - (pComponent.mana / 2), tComponent.pos.y - (pComponent.mana / 2), 2f)
+                        tComponent.size = Vector2(pComponent.mana, pComponent.mana)
+
+
+                        // Destroy all enemies that are hit by explosion
                         enemyEntities.forEach { e ->
                             e[TransformComponent.mapper]?.let { etComponent ->
-                                if(etComponent.pos.x < tComponent.pos.x + pComponent.mana &&
+                                if (etComponent.pos.x < tComponent.pos.x + pComponent.mana &&
                                         etComponent.pos.x > tComponent.pos.x - pComponent.mana &&
                                         etComponent.pos.y < tComponent.pos.y + pComponent.mana &&
-                                        etComponent.pos.y > tComponent.pos.y - pComponent.mana){
+                                        etComponent.pos.y > tComponent.pos.y - pComponent.mana) {
                                     pComponent.mana = 0f
-
-                                    batch.begin()
-                                    batch.draw(magic, tComponent.pos.x, tComponent.pos.y, 5f, 5f)
-                                    batch.end()
 
                                     engine.removeEntity(e)
                                 }
                             }
                         }
-
-
-
-
+                            engine.removeEntity(entity)
                     }
                 }
             }
