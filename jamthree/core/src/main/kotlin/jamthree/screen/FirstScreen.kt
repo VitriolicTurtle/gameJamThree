@@ -8,7 +8,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import jamthree.Jam
 import jamthree.engine.component.*
 import jamthree.unitScale
+import ktx.ashley.allOf
 import ktx.ashley.entity
+import ktx.ashley.get
 import ktx.ashley.with
 import ktx.log.debug
 import ktx.log.logger
@@ -63,6 +65,10 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                     setOriginCenter()
                 }
             }
+            with<CollisionComponent>{
+                isWall = false
+                isEnemy = true
+            }
         }
     }
 
@@ -74,6 +80,10 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
         secondCounter+=delta
         castTimer+=delta
 
+        val pEntities by lazy { engine.getEntitiesFor(allOf(PlayerComponent::class).get()) }
+        pEntities.forEach { p ->
+            val pComponent = p[PlayerComponent.mapper]
+            require(pComponent != null)
 
         if(castTimer > 0.1f) {
             // Pressing "J" = Using magic = Wild Magic bar goes up with an inconsistant amount. (current value * random multiplier)
@@ -91,12 +101,12 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
                     }
 
                     val random = 0.0f + Math.random() * (0.8f - 0.0f)
-                    if (wildMagicLevel <= 0.0f) wildMagicLevel += 0.0015f
-                    else wildMagicLevel += wildMagicLevel * random.toFloat()
-                    LOG.debug { wildMagicLevel.toString() }
+                    if (pComponent.mana <= 0.0f) pComponent.mana += 0.0015f
+                    else pComponent.mana += pComponent.mana * random.toFloat()
+                    LOG.debug { pComponent.mana.toString() }
                     batch.begin()
                     //  Wild magic bar updated every time magic is used
-                    batch.draw(magic, 0f, 0f, Gdx.graphics.width * wildMagicLevel, 0.2f)
+                    batch.draw(magic, 0f, 0f, Gdx.graphics.width * pComponent.mana, 0.2f)
                     batch.end()
                     doOnce = false
                 }
@@ -104,22 +114,26 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
             castTimer = 0f
         }
 
-        // Every second wild magic is reduced by 0.001 * random multiplier
-        if(secondCounter >= 1.0f && wildMagicLevel > 0.0f){
-            val random = 0.0f + Math.random() * (4f - 0.0f)
-            secondCounter = 0.0f
-            wildMagicLevel -= 0.001f*random.toFloat()
 
-            //  Wild magic bar update every second when bar is reduced
-            batch.begin()
-            batch.draw(magic, 0f, 0f,  Gdx.graphics.width * wildMagicLevel, 0.2f)
-            batch.end()
-        }
+
+
+            // Every second wild magic is reduced by 0.001 * random multiplier
+            if (secondCounter >= 1.0f && pComponent.mana > 0.0f) {
+                val random = 0.0f + Math.random() * (4f - 0.0f)
+                secondCounter = 0.0f
+                pComponent.mana -= 0.001f * random.toFloat()
+
+                //  Wild magic bar update every second when bar is reduced
+                batch.begin()
+                batch.draw(magic, 0f, 0f, Gdx.graphics.width * pComponent.mana, 0.2f)
+                batch.end()
+            }
 
         batch.begin()
         //  Wild magic bar
-        batch.draw(magic, 0f, 0f,  Gdx.graphics.width * wildMagicLevel, 0.2f)
+        batch.draw(magic, 0f, 0f,  Gdx.graphics.width * pComponent.mana, 0.2f)
         batch.end()
+        }
 
 
         if(wildMagicLevel>0.02){

@@ -6,9 +6,11 @@ import ktx.ashley.mapperFor
 
 class CollisionComponent() : Component, Pool.Poolable {
     var isWall = true
+    var isEnemy = false
 
     override fun reset(){
         isWall = true
+        isEnemy = false
     }
 
     companion object{

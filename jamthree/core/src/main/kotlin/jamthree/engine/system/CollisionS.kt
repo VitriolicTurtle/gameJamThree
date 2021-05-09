@@ -41,6 +41,9 @@ class CollisionSystem() : IteratingSystem(allOf(CollisionComponent::class, Trans
                         if (ptComponent.pos.x > collisionHitbox.x) ptComponent.pos.x = ptComponent.pos.x + 0.069f
                         if (ptComponent.pos.y < collisionHitbox.y) ptComponent.pos.y = ptComponent.pos.y - 0.069f
                         if (ptComponent.pos.y > collisionHitbox.y) ptComponent.pos.y = ptComponent.pos.y + 0.069f
+                    } else if(cComponent.isEnemy){
+                        pComponent.mana += 0.007f
+                        engine.removeEntity(entity)
                     }
                 }
             }
