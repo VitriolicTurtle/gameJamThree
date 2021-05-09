@@ -5,15 +5,15 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Pool
 import ktx.ashley.mapperFor
 
-class MovementComponent : Component, Pool.Poolable {
-    val velocity = Vector2(4f, 4f)
+class EnemyMovementComponent : Component, Pool.Poolable {
+    val velocity = Vector2(0f, 0f)
 
 
     override fun reset() {
-        velocity.set(4f, 4f)
+        velocity.set(0f, 0f)
     }
 
     companion object {
-        val mapper = mapperFor<MovementComponent>()
+        val mapper = mapperFor<EnemyMovementComponent>()
     }
 }

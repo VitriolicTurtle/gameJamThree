@@ -15,10 +15,12 @@ enum class Direction{
 class DirectionComponent : Component, Pool.Poolable {
     var currentDirection = Direction.DEFAULT
     var walkDirection = Direction.UP
+    var isColliding = false
 
     override fun reset() {
         currentDirection = Direction.DEFAULT
         walkDirection = Direction.UP
+        isColliding = false
     }
 
 

@@ -12,8 +12,7 @@ import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.log.debug
 import ktx.log.logger
-
-
+import java.io.File
 
 
 private val LOG = logger<FirstScreen>()
@@ -24,11 +23,14 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
 
 
     private val magic = Texture(Gdx.files.internal("graphics/Magic.png"))
+    private val enemyOne = Texture(Gdx.files.internal("graphics/Enemy01.png"))
+    private val floorOne = Texture(Gdx.files.internal("graphics/Floor01.png"))
+    private val wallOne = Texture(Gdx.files.internal("graphics/Wall01.png"))
     var wildMagicLevel = 0.0f
 
 
     private val playerBody = game.engine.entity{
-        with<TransformComponent> { pos.set(3f, 2f, -1f) }
+        with<TransformComponent> { pos.set(7f, 6f, -1f) }
         with<MovementComponent>()
         with<GraphicComponent>()
         with<PlayerComponent>()
@@ -44,8 +46,24 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
         with<GraphicComponent>()
     }
 
+
+
     override fun show(){
         LOG.debug{ "First screen "}
+
+        renderMap()
+
+        val testEnemy = game.engine.entity{
+            with<TransformComponent>{ pos.set(1f, 1f, 0f) }
+            with<EnemyMovementComponent>()
+            with<GraphicComponent>{
+                sprite.run {
+                    setRegion(enemyOne)
+                    setSize(texture.width * unitScale, texture.height * unitScale)
+                    setOriginCenter()
+                }
+            }
+        }
     }
 
     var secondCounter = 0f
@@ -107,6 +125,43 @@ class FirstScreen(game: Jam, val controller: Controller) : JamScreen(game) {
         }
     }
 
+    fun renderMap(){
+        try{
+            var tileArray = arrayOf<CharArray>()
+            var column = 0
+            var row = 0
+            val fileName = "assets/magicMap.txt"
+            val lines:List<String> = File(fileName).readLines().asReversed()
+            lines.forEach { line ->
+                column = 0
+                line.forEach { char ->
+                    val mapEntity = engine.entity {
+                        with<TransformComponent> {
+                            pos.set(column.toFloat(), row.toFloat(), -2f)
+                        }
+                        with<GraphicComponent> {
+                            sprite.run {
+                                if(char == '0'){setRegion(floorOne)}
+                                if(char == '1'){setRegion(wallOne)}
+                                setSize(texture.width * unitScale, texture.height * unitScale)
+                                setOriginCenter()
+                            }
+                        }
+                        if(char == '1') with<CollisionComponent>()
+                    }
+                    column=column+1
+                }
+                row=row+1
+                LOG.debug { line }
+            }
 
+
+        }catch(e:Exception){
+            e.printStackTrace()
+            LOG.debug { "Reading Failed" }
+        }finally{
+            LOG.debug { "Done Reading" }
+        }
+    }
 
 }

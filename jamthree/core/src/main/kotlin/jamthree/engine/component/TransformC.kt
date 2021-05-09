@@ -9,8 +9,8 @@ import ktx.ashley.get
 import ktx.ashley.mapperFor
 
 class TransformComponent : Component, Pool.Poolable, Comparable<TransformComponent> {
-    val pos = Vector3()
-    val size = Vector2(1f, 1f)
+    var pos = Vector3()
+    var size = Vector2(1f, 1f)
     var rot = 0f
 
     override fun reset(){

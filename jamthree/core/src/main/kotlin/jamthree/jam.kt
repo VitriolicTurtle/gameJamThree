@@ -103,6 +103,8 @@ class Jam(var type1: String, var type2: String) : KtxGame<KtxScreen>() {
     val engine: Engine by lazy { PooledEngine().apply{
         addSystem(InputSystem(gameViewport, controller))
         addSystem(MovementSystem())
+        addSystem(EnemyMovementSystem())
+        addSystem(CollisionSystem())
         addSystem(AnimationPlayerSystem(
             playerBodyTextureRight,
             playerBodyTextureLeft,

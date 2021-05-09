@@ -51,7 +51,7 @@ class EntityLinkSystem(
             transform.pos.set(
                 linkTransform.pos.x + link.offset.x,
                 linkTransform.pos.y + link.offset.y,
-                transform.pos.z
+                    linkTransform.pos.z
             )
 
         }
