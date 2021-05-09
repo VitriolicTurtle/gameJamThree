@@ -33,7 +33,7 @@ class SecondScreen(game: Jam) : JamScreen(game) {
 
         batch.begin()
         //  Wild magic bar updated every time magic is used
-        batch.draw(gameOver, 0f, 0f, 16f*58, 9f*58)
+        batch.draw(gameOver, 0f, 0f, 17f*48, 10f*48)
 
         batch.end()
 
