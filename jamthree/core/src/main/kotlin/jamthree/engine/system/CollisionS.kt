@@ -25,6 +25,7 @@ class CollisionSystem(val batch: Batch) : IteratingSystem(allOf(CollisionCompone
     private val projEntities by lazy { engine.getEntitiesFor(allOf(ProjectileComponent::class).get()) }
     private val enemyEntities by lazy { engine.getEntitiesFor(allOf(EnemyMovementComponent::class).get()) }
     private val magic = Texture(Gdx.files.internal("graphics/Blast.png"))
+    private val oof = Gdx.audio.newSound(Gdx.files.internal("oof.mp3"));
 
     private var pHitbox = Rectangle()           // Player
     private var collisionHitbox = Rectangle()   // Entity player collides with
@@ -63,6 +64,7 @@ class CollisionSystem(val batch: Batch) : IteratingSystem(allOf(CollisionCompone
                         if (ptComponent.pos.y > collisionHitbox.y) ptComponent.pos.y = ptComponent.pos.y + 0.069f
                     } else if(cComponent.isEnemy){
                         pComponent.mana += 2f
+                        oof.play(0.6f)
                         engine.removeEntity(entity)
                     } else if(cComponent.isBomb) {
 
